@@ -1,4 +1,4 @@
-module Analytics-Service/send
+module analytics-service
 
 go 1.24.1
 
