@@ -9,10 +9,10 @@ RUN go mod download
 COPY ./ ./
 
 # Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping ./cmd/app/main.go
 
 # Expose the application port
 EXPOSE 8080
 
 # Run the application
-CMD ["/docker-gs-ping"]
+ENTRYPOINT ["/docker-gs-ping"]
