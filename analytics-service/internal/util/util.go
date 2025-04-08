@@ -10,6 +10,7 @@ import (
 func FailOnError(err error, msg string) {
     if err != nil {
         slog.Error(msg, slog.Any("error", err))
+        panic(err)
     }
 }
 

@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 
+	"analytics-service/internal/controller"
 	"analytics-service/internal/messaging"
+	"analytics-service/internal/repository"
 	"analytics-service/internal/telemetry"
+	"analytics-service/internal/util"
 )
 
 func main() {
@@ -19,7 +23,7 @@ func main() {
 func run() error {
     ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
     defer stop()
-
+    
     appName := os.Getenv("APP_NAME")
     rabbitMQConnectionString := os.Getenv("RABBITMQ_CONNECTION_STRING")
 
@@ -33,8 +37,15 @@ func run() error {
         }
     }()
 
-    slog.Info("Starting Analytics Service")
+    err = repository.InitTables()
+    util.FailOnError(err, "Failed to initialize database tables")
+    slog.Info("Database tables initialized")
+
+    mux := http.NewServeMux()
+    mux.HandleFunc("/messages", controller.GetMessages())
+
     messaging.SetUpMessaging(rabbitMQConnectionString)
+    http.ListenAndServe(":8080", mux)
 
     <-ctx.Done()
     slog.Info("Shutting down due to interrupt")

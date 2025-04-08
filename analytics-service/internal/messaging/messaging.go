@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"analytics-service/internal/repository"
 	"analytics-service/internal/telemetry"
 	"analytics-service/internal/util"
 
@@ -17,11 +18,8 @@ import (
 func SetUpMessaging(connectionString string) {
     conn, err := amqp.Dial(connectionString)
     util.FailOnError(err, "Failed to connect to RabbitMQ")
-    defer conn.Close()
-
     ch, err := conn.Channel()
     util.FailOnError(err, "Failed to open a channel")
-    defer ch.Close()
 
     qCheckSong, err := ch.QueueDeclare(
         "check_song_queue",
@@ -54,28 +52,39 @@ func SetUpMessaging(connectionString string) {
     )
     util.FailOnError(err, "Failed to register a consumer")
 
-    go func() {
-        propagator := propagation.TraceContext{}
-        for d := range msgs {
-            headers := util.RabbitMQHeaderCarrier(d.Headers)
-            ctx := propagator.Extract(context.Background(), headers)
-            ctx, span := telemetry.Tracer.Start(ctx, "consumeMessage")
-            slog.InfoContext(ctx, "Received a message" + string(d.Body))
-            span.SetAttributes(attribute.String("message.body", string(d.Body)))
-            span.SetAttributes(attribute.String("message.queue", qSongPredicted.Name))
-            telemetry.MessagesConsumed.Add(ctx, 1)
-            span.End()
-        }
-    }()
-
-    slog.Info("Waiting for messages. To exit press CTRL+C")
-    produceTestMessages(ch, qCheckSong)
+    go consumeMessages(msgs, qSongPredicted)
+    go produceTestMessages(conn, ch, qCheckSong)
 }
 
-func produceTestMessages(ch *amqp.Channel, q amqp.Queue) {
+func consumeMessages(msgs <-chan amqp.Delivery, qSongPredicted amqp.Queue) {
+    slog.Info("Waiting for messages.")
+    propagator := propagation.TraceContext{}
+    for d := range msgs {
+        headers := util.RabbitMQHeaderCarrier(d.Headers)
+        ctx := propagator.Extract(context.Background(), headers)
+        ctx, span := telemetry.Tracer.Start(ctx, "consumeMessage")
+        slog.InfoContext(ctx, "Received a message: " + string(d.Body))
+        span.SetAttributes(attribute.String("message.body", string(d.Body)))
+        span.SetAttributes(attribute.String("message.queue", qSongPredicted.Name))
+        telemetry.MessagesConsumed.Add(ctx, 1)
+
+        id, err := repository.CreateMessage(string(d.Body))
+        util.FailOnError(err, "Failed to create message in database")
+        slog.InfoContext(ctx, "Created message in database with ID: "+fmt.Sprint(id))
+        span.SetAttributes(attribute.Int("message.id", id))
+
+        span.End()
+    }
+}
+
+func produceTestMessages(conn *amqp.Connection, ch *amqp.Channel, q amqp.Queue) {
+    slog.Info("Producing test messages every 30 seconds.")
     ticker := time.NewTicker(30 * time.Second)
-    defer ticker.Stop()
     idx := 0
+
+    defer ticker.Stop()
+    defer conn.Close()
+    defer ch.Close()
 
     for range ticker.C {
         ctx, span := telemetry.Tracer.Start(context.Background(), "produceMessage")
