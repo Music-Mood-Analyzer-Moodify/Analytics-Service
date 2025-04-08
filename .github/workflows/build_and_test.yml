@@ -27,6 +27,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
           cache: true
 
+      - name: Print all directories
+        run: ls -R
+
       - name: Install dependencies
         run: go get .
 
