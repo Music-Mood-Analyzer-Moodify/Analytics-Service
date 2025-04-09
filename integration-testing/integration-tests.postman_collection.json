@@ -46,8 +46,8 @@
         "url": {
           "raw": "http://song-service:8080/message/lalala",
           "protocol": "http",
-          "host": ["localhost"],
-          "port": "8092",
+          "host": ["song-service"],
+          "port": "8080",
           "path": ["message", "lalala"],
           "query": [
             {
@@ -105,8 +105,8 @@
         "url": {
           "raw": "http://song-service:8080/message/popopo",
           "protocol": "http",
-          "host": ["localhost"],
-          "port": "8092",
+          "host": ["song-service"],
+          "port": "8080",
           "path": ["message", "popopo"],
           "query": [
             {
@@ -186,8 +186,8 @@
         "url": {
           "raw": "http://analytics-service:8080/messages",
           "protocol": "http",
-          "host": ["localhost"],
-          "port": "8091",
+          "host": ["analytics-service"],
+          "port": "8080",
           "path": ["messages"]
         }
       },
