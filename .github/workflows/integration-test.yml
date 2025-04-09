@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: ["main"]
   push:
-    branches: ["main", "develop"] # Remove develop later
+    branches: ["main"]
   schedule:
     - cron: "0 0 * * 0" # Every Sunday at midnight
   # Uncomment the following line to run the workflow every day at midnight
@@ -33,11 +33,11 @@ jobs:
       - name: Compose CI File
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
 
-      - name: Wait a bit
-        run: sleep 30
-
       - name: Install Newman on the client container
         run: docker exec integration-client npm install -g newman-reporter-htmlextra
+
+      - name: Wait a bit
+        run: sleep 10
 
       - name: Run Integration Tests
         run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
