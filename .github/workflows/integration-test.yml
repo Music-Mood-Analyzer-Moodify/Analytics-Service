@@ -21,6 +21,8 @@ jobs:
 
       - name: Set up Docker-Compose
         uses: KengoTODA/actions-setup-docker-compose@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compose CI File
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
