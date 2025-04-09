@@ -1,0 +1,56 @@
+name: Integration Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  schedule:
+    - cron: "0 0 * * 0" # Every Sunday at midnight
+  # Uncomment the following line to run the workflow every day at midnight
+  # schedule:
+  #   - cron: "0 0 * * *" # Every day at midnight
+
+jobs:
+  Integration-Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker-Compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Compose CI File
+        run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
+
+      - name: Install Newman on the client container
+        run: docker exec integration-client npm install -g newman-reporter-htmlextra
+
+      - name: Wait a bit
+        run: sleep 10
+
+      - name: Run Integration Tests
+        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
+
+      - name: Copy Report to Host
+        run: docker cp integration-client:report.html .
+
+      - name: Stop and Remove Containers
+        run: docker-compose -f ./integration-testing/docker-compose.ci.yml down
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-report
+          path: report.html
+        if: always()

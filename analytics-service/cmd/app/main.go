@@ -37,8 +37,8 @@ func run() error {
         }
     }()
 
-    err = repository.InitTables()
-    util.FailOnError(err, "Failed to initialize database tables")
+    db_err := repository.InitTables()
+    util.FailOnError(db_err, "Failed to initialize database tables")
     slog.Info("Database tables initialized")
 
     mux := http.NewServeMux()
