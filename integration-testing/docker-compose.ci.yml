@@ -58,7 +58,7 @@ services:
     depends_on:
       song-db:
         condition: "service_healthy"
-    image: judahlit/moodify-song-service:latest
+    image: judahlit/moodify_song_service:latest
     restart: unless-stopped
     environment:
       - SERVER_PORT=8080
