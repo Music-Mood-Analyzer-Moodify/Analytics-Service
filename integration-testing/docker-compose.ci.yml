@@ -19,7 +19,7 @@ services:
         condition: "service_healthy"
     image: analytics-service
     build:
-      context: ./Analytics-Service/analytics-service
+      context: ${{ github.workspace }}
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
