@@ -39,7 +39,7 @@ jobs:
       - name: Wait for Services to be Healthy
         run: |
           echo "Waiting for services to be healthy..."
-          sleep 20
+          sleep 60
 
       - name: Run Integration Tests
         run: docker exec client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
