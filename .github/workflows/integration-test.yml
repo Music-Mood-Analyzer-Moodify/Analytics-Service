@@ -37,13 +37,13 @@ jobs:
         run: sleep 30
 
       - name: Install Newman on the client container
-        run: docker exec client npm install -g newman-reporter-htmlextra
+        run: docker exec integration-client npm install -g newman-reporter-htmlextra
 
       - name: Run Integration Tests
-        run: docker exec client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
+        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
 
       - name: Copy Report to Host
-        run: docker cp client:report.html .
+        run: docker cp integration-client:report.html .
 
       - name: Stop and Remove Containers
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml down
