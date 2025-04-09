@@ -34,12 +34,12 @@ jobs:
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
 
       - name: Install Newman on the client container
-        run: docker exec -it client npm install -g newman-reporter-htmlextra
+        run: docker exec client npm install -g newman-reporter-htmlextra
 
       - name: Wait for Services to be Healthy
         run: |
           echo "Waiting for services to be healthy..."
-          sleep 45
+          sleep 20
 
       - name: Run Integration Tests
         run: docker exec client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
