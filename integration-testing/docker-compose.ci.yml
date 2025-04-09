@@ -1,0 +1,111 @@
+services:
+  client:
+    container_name: client
+    image: moodify-client
+    build:
+      context: .
+      dockerfile: ClientDockerfile
+    depends_on:
+      - analytics-service
+      - song-service
+      - analytics-db
+      - song-db
+      - rabbit-mq-moodify
+
+  analytics-service:
+    container_name: analytics-service
+    depends_on:
+      analytics-db:
+        condition: "service_healthy"
+    image: analytics-service
+    build:
+      context: ./Analytics-Service/analytics-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - APP_NAME="analytics-service"
+      - POSTGRES_DB="analytics"
+      - POSTGRES_HOST="analytics-db"
+      - POSTGRES_PASSWORD="password"
+      - POSTGRES_PORT="5432"
+      - POSTGRES_USER="username"
+      - RABBITMQ_CONNECTION_STRING="amqp://guest:guest@rabbit-mq-moodify:5672/"
+      - DISABLE_TELEMETRY="true"
+    ports:
+      - "8091:8080"
+  analytics-db:
+    container_name: analytics-db
+    restart: always
+    image: postgres:alpine
+    environment:
+      - POSTGRES_PASSWORD=nosrep
+      - POSTGRES_USER=person
+      - POSTGRES_DB=analytics
+    ports:
+      - "5440:5432"
+    expose:
+      - 5432
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 1s
+      timeout: 2s
+      retries: 10
+    volumes:
+      - analytics-db-volume:/var/lib/analytics-db
+
+  song-service:
+    container_name: song-service
+    depends_on:
+      song-db:
+        condition: "service_healthy"
+    image: judahlit/moodify-song-service:latest
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - MONGO_URI=mongodb://yippie:eippiy@song-db:27017
+      - MONGO_DATABASE=Song
+      - RABBIT_HOST=rabbit-mq-moodify
+      - RABBIT_PORT=5672
+      - RABBIT_USER=guest
+      - RABBIT_PASSWORD=guest
+    ports:
+      - "8092:8080"
+  song-db:
+    container_name: song-db
+    image: bitnami/mongodb:latest
+    restart: unless-stopped
+    environment:
+      - MONGO_USERNAME=yippie
+      - MONGO_PASSWORD=eippiy
+      - MONGO_DATABASE=Song
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=yippieroot
+      - MONGO_INITDB_DATABASE=Song
+    ports:
+      - "27021:27017"
+    expose:
+      - 27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    volumes:
+      - ./integration-testing/song-service-mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - song-db-volume:/var/lib/song-db
+
+  rabbit-mq-moodify:
+    container_name: rabbit-mq-moodify
+    restart: unless-stopped
+    image: rabbitmq:management-alpine
+    ports:
+      - "5679:5672"
+      - "15679:15672"
+    expose:
+      - 5672
+      - 15672
+
+volumes:
+  analytics-db-volume:
+  song-db-volume:
