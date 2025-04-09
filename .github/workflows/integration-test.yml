@@ -33,27 +33,8 @@ jobs:
       - name: Compose CI File
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
 
-      - name: Test if the analytics-service is healthy
-        run: |
-          for i in {1..10}; do
-            if [ "$(docker inspect -f '{{.State.Health.Status}}' analytics-service)" == "healthy" ]; then
-              echo "analytics-service is healthy!"
-              break
-            fi
-            echo "Waiting for analytics-service to be healthy..."
-            sleep 5
-          done
-
-      - name: Test if the song-service is healthy
-        run: |
-          for i in {1..10}; do
-            if [ "$(docker inspect -f '{{.State.Health.Status}}' song-service)" == "healthy" ]; then
-              echo "song-service is healthy!"
-              break
-            fi
-            echo "Waiting for song-service to be healthy..."
-            sleep 5
-          done
+      - name: Wait a bit
+        run: sleep 30
 
       - name: Install Newman on the client container
         run: docker exec client npm install -g newman-reporter-htmlextra

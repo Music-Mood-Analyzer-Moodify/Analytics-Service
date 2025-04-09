@@ -44,9 +44,9 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "http://song-service:8080/message/lalala",
+          "raw": "http://integration-song-service:8080/message/lalala",
           "protocol": "http",
-          "host": ["song-service"],
+          "host": ["integration-song-service"],
           "port": "8080",
           "path": ["message", "lalala"],
           "query": [
@@ -103,9 +103,9 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "http://song-service:8080/message/popopo",
+          "raw": "http://integration-song-service:8080/message/popopo",
           "protocol": "http",
-          "host": ["song-service"],
+          "host": ["integration-song-service"],
           "port": "8080",
           "path": ["message", "popopo"],
           "query": [
@@ -184,9 +184,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://analytics-service:8080/messages",
+          "raw": "http://integration-analytics-service:8080/messages",
           "protocol": "http",
-          "host": ["analytics-service"],
+          "host": ["integration-analytics-service"],
           "port": "8080",
           "path": ["messages"]
         }
