@@ -47,25 +47,11 @@ func run() error {
     messaging.SetUpMessaging(rabbitMQConnectionString)
 
     handler := http.Handler(mux)
-    if err := http.ListenAndServe(":8080", corsMiddleware(handler)); err != nil {
+    if err := http.ListenAndServe(":8080", handler); err != nil {
         slog.Error("Server failed", "error", err)
     }
 
     <-ctx.Done()
     slog.Info("Shutting down due to interrupt")
     return nil
-}
-
-func corsMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        if r.Header.Get("Origin") == "" {
-            http.Error(w, "Missing Origin header", http.StatusForbidden)
-            return
-        }
-        if r.Header.Get("Origin") != os.Getenv("ALLOWED_ORIGIN") {
-            http.Error(w, "Invalid Origin header", http.StatusForbidden)
-            return
-        }
-        next.ServeHTTP(w, r)
-    })
 }
