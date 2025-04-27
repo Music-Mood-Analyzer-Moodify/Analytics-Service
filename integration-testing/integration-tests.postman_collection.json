@@ -112,12 +112,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8096/api/song/message/lalala",
+					"raw": "http://integration-gateway-moodify:8080/api/song/message/lalala",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"integration-gateway-moodify"
 					],
-					"port": "8096",
+					"port": "8080",
 					"path": [
 						"api",
 						"song",
@@ -189,12 +189,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8096/api/song/message/popopo",
+					"raw": "http://integration-gateway-moodify:8080/api/song/message/popopo",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"integration-gateway-moodify"
 					],
-					"port": "8096",
+					"port": "8080",
 					"path": [
 						"api",
 						"song",
@@ -298,12 +298,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8096/api/analytics/messages",
+					"raw": "http://integration-gateway-moodify:8080/api/analytics/messages",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"integration-gateway-moodify"
 					],
-					"port": "8096",
+					"port": "8080",
 					"path": [
 						"api",
 						"analytics",
