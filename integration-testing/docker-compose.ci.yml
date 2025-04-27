@@ -12,6 +12,21 @@ services:
       - song-db
       - rabbit-mq-moodify
 
+  gateway-moodify:
+    container_name: integration-gateway-moodify
+    image: judahlit/moodify_gateway:latest
+    restart: unless-stopped
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/firebase-credentials.json
+      - GOOGLE_CLOUD_PROJECT_ID=moodify-web-frontend
+      - ANALYTICS_SERVICE_URL=http://integration-analytics-service:8080
+      - SONG_SERVICE_URL=http://integration-song-service:8080
+      - CORS_ALLOWED_ORIGIN=http://localhost:3000
+    ports:
+      - "8096:8080"
+    volumes:
+      - ./secrets/firebase-credentials.json:/app/firebase-credentials.json
+
   analytics-service:
     container_name: integration-analytics-service
     depends_on:
@@ -32,7 +47,7 @@ services:
       - RABBITMQ_CONNECTION_STRING=amqp://guest:guest@integration-rabbit-mq-moodify:5672/
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://integration-otel-collector:4318
     ports:
-      - "8099:8080"
+      - "8097:8080"
   analytics-db:
     container_name: integration-analytics-db
     restart: always
