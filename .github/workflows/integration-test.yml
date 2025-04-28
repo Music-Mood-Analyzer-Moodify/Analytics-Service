@@ -42,7 +42,7 @@ jobs:
           echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./secrets/firebase-credentials.json
 
       - name: Wait a bit
-        run: sleep 15
+        run: sleep 60
 
       - name: Run Integration Tests
         run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --env-var "api_key=${{ secrets.INTEGRATION_TEST_GOOGLE_API_KEY }}" --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
