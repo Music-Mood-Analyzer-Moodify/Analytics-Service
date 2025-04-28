@@ -39,10 +39,10 @@ jobs:
       - name: Create Firebase credentials file
         run: |
           mkdir -p ./secrets
-          echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./secrets/firebase-credentials.json
+          echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./integration-testing/secrets/firebase-credentials.json
 
       - name: Wait a bit
-        run: sleep 60
+        run: sleep 10
 
       - name: Run Integration Tests
         run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --env-var "api_key=${{ secrets.INTEGRATION_TEST_GOOGLE_API_KEY }}" --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
