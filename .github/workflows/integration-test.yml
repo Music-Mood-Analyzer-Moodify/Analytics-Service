@@ -30,16 +30,16 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.ACCESS_TOKEN }}
 
+      - name: Create Firebase credentials file
+        run: |
+          mkdir -p ./integration-testing/secrets
+          echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./integration-testing/secrets/firebase-credentials.json
+
       - name: Compose CI File
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
 
       - name: Install Newman on the client container
         run: docker exec integration-client npm install -g newman-reporter-htmlextra
-
-      - name: Create Firebase credentials file
-        run: |
-          mkdir -p ./integration-testing/secrets
-          echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./integration-testing/secrets/firebase-credentials.json
 
       - name: Wait a bit
         run: sleep 10
