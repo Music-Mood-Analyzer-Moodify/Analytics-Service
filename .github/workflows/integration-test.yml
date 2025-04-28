@@ -6,13 +6,15 @@ on:
     branches: ["main"]
   push:
     branches: ["main"]
+  schedule:
+    - cron: "0 0 * * 0" # Every Sunday at midnight
+  # Uncomment the following line to run the workflow every day at midnight
+  # schedule:
+  #   - cron: "0 0 * * *" # Every day at midnight
 
 jobs:
   Integration-Test:
-    runs-on: self-hosted
-    container:
-      image: ubuntu:latest
-      options: --user root
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +42,7 @@ jobs:
           echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./secrets/firebase-credentials.json
 
       - name: Run Integration Tests
-        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
+        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --env-var "api_key=${{ secrets.INTEGRATION_TEST_GOOGLE_API_KEY }}" --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
 
       - name: Copy Report to Host
         run: docker cp integration-client:report.html .
