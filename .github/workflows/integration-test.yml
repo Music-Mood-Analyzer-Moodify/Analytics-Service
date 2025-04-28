@@ -38,7 +38,7 @@ jobs:
 
       - name: Create Firebase credentials file
         run: |
-          mkdir -p ./secrets
+          mkdir -p ./integration-testing/secrets
           echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./integration-testing/secrets/firebase-credentials.json
 
       - name: Wait a bit
