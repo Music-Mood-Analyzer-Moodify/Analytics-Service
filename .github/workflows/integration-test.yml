@@ -30,6 +30,11 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.ACCESS_TOKEN }}
 
+      - name: Create Firebase credentials file
+        run: |
+          mkdir -p ./integration-testing/secrets
+          echo "${{ secrets.FIREBASE_CREDS_B64 }}" | base64 --decode > ./integration-testing/secrets/firebase-credentials.json
+
       - name: Compose CI File
         run: docker-compose -f ./integration-testing/docker-compose.ci.yml up -d --build
 
@@ -40,7 +45,7 @@ jobs:
         run: sleep 10
 
       - name: Run Integration Tests
-        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
+        run: docker exec integration-client newman run integration-tests.postman_collection.json -e integration-tests.postman_collection.json --env-var "api_key=${{ secrets.INTEGRATION_TEST_GOOGLE_API_KEY }}" --insecure --delay-request 1000 --reporters cli,htmlextra --reporter-htmlextra-export report.html
 
       - name: Copy Report to Host
         run: docker cp integration-client:report.html .

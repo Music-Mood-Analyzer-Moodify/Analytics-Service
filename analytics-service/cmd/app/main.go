@@ -45,7 +45,11 @@ func run() error {
     mux.HandleFunc("/messages", controller.GetMessages())
 
     messaging.SetUpMessaging(rabbitMQConnectionString)
-    http.ListenAndServe(":8080", mux)
+
+    handler := http.Handler(mux)
+    if err := http.ListenAndServe(":8080", handler); err != nil {
+        slog.Error("Server failed", "error", err)
+    }
 
     <-ctx.Done()
     slog.Info("Shutting down due to interrupt")
