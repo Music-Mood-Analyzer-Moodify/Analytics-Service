@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: ClientDockerfile
     depends_on:
+      - gateway-moodify
       - analytics-service
       - song-service
       - analytics-db
