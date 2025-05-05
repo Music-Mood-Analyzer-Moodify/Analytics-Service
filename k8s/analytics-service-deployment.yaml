@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service-service
+spec:
+  selector:
+    app: analytics-service
+  ports:
+    - port: 9101
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service-deployment
+  labels:
+    app: analytics-service
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+        - name: analytics-service
+          # image: judahlit/moodify_analytics_service:latest
+          image: k3d-moodify:5000/analytics_service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+          env:
+            - name: APP_NAME
+              value: "analytics-service"
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: postgres-db
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: postgres-password
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: postgres-host
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: postgres-port
+            - name: RABBITMQ_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: connection-string
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: otel-secret
+                  key: endpoint
