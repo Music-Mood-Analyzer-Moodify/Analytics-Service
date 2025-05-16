@@ -6,7 +6,7 @@ spec:
   selector:
     app: analytics-service
   ports:
-    - port: 9101
+    - port: 8081
       targetPort: 8080
   type: LoadBalancer
 ---
@@ -68,10 +68,7 @@ spec:
             - name: RABBITMQ_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
-                  name: rabbitmq-secret
-                  key: connection-string
+                  name: rabbitmq-default-user
+                  key: connection_string
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: otel-secret
-                  key: endpoint
+              value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318"
